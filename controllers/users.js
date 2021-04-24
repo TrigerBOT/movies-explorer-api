@@ -67,9 +67,13 @@ const patchUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError("Нет пользователя с таким id");
       }
-      console.log('obnnovili')
+
+      console.log(user)
       res.status(200).send(user);
     })
+    .catch((err) => {if (err.name === "MongoError" || err.code === "11000") {
+      throw new ConflictError("Такой емейл уже зарегистрирован");
+    }})
     .catch(next);
 };
 // POST /signin

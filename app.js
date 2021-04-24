@@ -22,7 +22,7 @@ app.use(express.json());
 const options = {
   origin: [
     "http://localhost:3000",
-    "https://kirill-trigerbot.nomoredomains.icu",
+    "http://moviefinder.nomoredomains.club",
     "https://TrigerBOT.github.io",
   ],
 
@@ -62,8 +62,8 @@ app.post(
   login
 );
 
-app.use('/users', auth, usersRoutes);
-app.use('/movies', auth, moviesRoutes);
+app.use('/users', auth, usersRout);
+app.use('/movies', auth, moviesRout);
 app.use('*', () => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
