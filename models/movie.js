@@ -1,5 +1,6 @@
-const mongoose = require("mongoose");
-const { invalidURL, urlRegExp } = require("../utils/constants");
+const mongoose = require('mongoose');
+const isURL = require('validator/lib/isURL');
+const { invalidURL } = require('../utils/constants');
 
 const movieSchema = new mongoose.Schema({
   country: {
@@ -13,7 +14,7 @@ const movieSchema = new mongoose.Schema({
   },
 
   duration: {
-    type: Number,
+    type: String,
     required: true,
   },
 
@@ -26,22 +27,23 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
   image: {
-    type: Object,
+    type: String,
     required: true,
-    url: { type: String, required: false },
+    validate: {
+      validator: (v) => isURL(v),
+      message: invalidURL,
+    },
+    message: invalidURL,
   },
-
   trailer: {
     type: String,
     required: true,
     validate: {
-      validator(v) {
-        return urlRegExp.test(v);
-      },
+      validator: (v) => isURL(v),
       message: invalidURL,
     },
+
   },
   movieId: {
     type: Number,
@@ -49,9 +51,8 @@ const movieSchema = new mongoose.Schema({
   },
   // Нужно задать поведение по умолчанию, чтобы база данных не возвращала это поле.
   owner: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: "user",
-    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
     selected: false,
   },
 
@@ -59,11 +60,18 @@ const movieSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
+  thumbnail: {
+    type: String,
+    required: true,
+    validate: {
+      validator: (v) => isURL(v),
+      message: invalidURL,
+    },
+  },
   nameEN: {
     type: String,
     required: true,
   },
 });
 
-module.exports = mongoose.model("movie", movieSchema);
+module.exports = mongoose.model('movie', movieSchema);

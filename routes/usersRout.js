@@ -1,5 +1,5 @@
-const router = require("express").Router();
-const { celebrate, Joi } = require("celebrate");
+const router = require('express').Router();
+const { celebrate, Joi } = require('celebrate');
 const { getMe, patchUser } = require('../controllers/users');
 
 // возвращает информацию о пользователе (email и имя)

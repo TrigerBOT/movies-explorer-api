@@ -1,18 +1,12 @@
-const jwt = require("jsonwebtoken");
-const NotFoundError = require("../errors/not-found-err");
-const BadRequestError = require("../errors/bad-request");
-const ConflictError = require("../errors/conflict-err");
-const {
-  idExistsError,
-  searchFilmError,
-  invalidMovieId,
-} = require("../utils/constants");
-const Movie = require("../models/movie");
+const NotFoundError = require('../errors/not-found-err');
+const BadRequestError = require('../errors/bad-request');
+const ConflictError = require('../errors/conflict-err');
+
+const { idExistsError, searchFilmError } = require('../utils/constants');
+const Movie = require('../models/movie');
 // POST /movies
 const createMovie = (req, res, next) => {
-  const { authorization } = req.headers;
-  const token = authorization.replace("Bearer ", "");
-  const ownerId = jwt.decode(token);
+  const ownerId = req.user._id;
 
   const {
     country,
@@ -40,43 +34,45 @@ const createMovie = (req, res, next) => {
     nameEN,
   })
     .then((movie) => {
-      if (movie) {
-        res.send(movie);
-      } else {
+      res.status(201).send({ data: movie });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        throw new BadRequestError(err.message);
+      } else if (err.code === 11000) {
         throw new ConflictError(idExistsError);
       }
     })
-    .catch((err) => next(err));
+    .catch(next);
 };
+
 // GET /movies
 const getOwnMovies = (req, res, next) => {
   const owner = req.user._id;
 
   Movie.find({ owner })
     .then((movies) => {
-      if (!movies) {
-        throw new NotFoundError(searchFilmError);
-      }
-      res.send(movies);
+      res.status(200).send(movies);
     })
-    .catch((err) => next(err));
+    .catch(() => {
+      throw new NotFoundError(searchFilmError);
+    })
+    .catch(next);
 };
+
 // DELETE /movies/:movieId
 const removeMovie = (req, res, next) => {
-  const reqMovieId = req.params.movieId;
-
-  Movie.find({ movieId: reqMovieId })
-    .then((movie) => {
-      if (movie === null) {
+  Movie.findOneAndDelete({
+    _id: req.params.movieId,
+    owner: req.user._id,
+  })
+    .then((deletedMovie) => {
+      if (!deletedMovie) {
         throw new NotFoundError(searchFilmError);
-      } else if (String(req.params.movieId) !== String(movie[0].movieId)) {
-        throw new BadRequestError(invalidMovieId);
       }
-      movie[0].remove().then((deleted) => {
-        res.status(200).send({ deleted });
-      });
+      res.status(200).send({ data: deletedMovie });
     })
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports = {

@@ -20,21 +20,20 @@
   "homepage": "https://api.kirill-trigerbot.nomoredomains.icu",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "body-parser": "^1.19.0",
     "celebrate": "^14.0.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
+    "eslint-config-airbnb": "^18.2.1",
     "express": "^4.17.1",
     "express-winston": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.5",
-    "validate": "^5.1.0",
     "validator": "^13.6.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "eslint": "^7.21.0",
-    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint": "^7.25.0",
+    "eslint-config-airbnb-base": "^18.2.1",
     "eslint-plugin-import": "^2.22.1",
     "nodemon": "^2.0.7"
   }
