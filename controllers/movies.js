@@ -1,13 +1,11 @@
 const NotFoundError = require('../errors/not-found-err');
 const BadRequestError = require('../errors/bad-request');
 const ConflictError = require('../errors/conflict-err');
-
 const { idExistsError, searchFilmError } = require('../utils/constants');
 const Movie = require('../models/movie');
 // POST /movies
 const createMovie = (req, res, next) => {
   const ownerId = req.user._id;
-
   const {
     country,
     director,
