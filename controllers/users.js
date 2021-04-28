@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 const BadRequestError = require('../errors/bad-request');
-const UnauthorizedError = require('../errors/unauthorized');
+
 const ConflictError = require('../errors/conflict-err');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
@@ -16,9 +16,6 @@ const getMe = (req, res, next) => User.findById(req.user._id)
     }
     console.log({ data: user });
     return res.status(200).send({ data: user });
-  })
-  .catch((err) => {
-    res.send(err);
   })
   .catch(next);
 
@@ -41,6 +38,8 @@ const createUser = (req, res, next) => {
       }
       if (err.name === 'MongoError' && err.code === 11000) {
         throw new ConflictError('Такой емейл уже зарегистрирован');
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -52,20 +51,21 @@ const patchUser = (req, res, next) => {
   const owner = req.user._id;
   const newName = req.body.name;
   const newEmail = req.body.email;
-
-  User.findOneAndUpdate(
-    { _id: owner },
-    { name: newName, email: newEmail },
-    { runValidators: true, new: true },
-  )
-    .then((user) => {
-      res.status(200).send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'MongoError' && err.code === 11000) {
+  User.findOne({ newEmail })
+    .then(((user) => {
+      if (user && user._id.toString() !== owner._id.toString()) {
         throw new ConflictError('Такой емейл уже зарегистрирован');
       }
-    })
+      User.findOneAndUpdate(
+        { _id: owner },
+        { name: newName, email: newEmail },
+        { runValidators: true, new: true },
+      )
+        .then((userData) => {
+          res.status(200).send(userData);
+        })
+        .orFail(() => { throw new NotFoundError('Нет пользователя с таким id'); });
+    }))
     .catch(next);
 };
 // POST /signin
@@ -80,9 +80,6 @@ const login = (req, res, next) => {
       );
 
       res.send({ token });
-    })
-    .catch((err) => {
-      throw new UnauthorizedError(err.message);
     })
     .catch(next);
 };

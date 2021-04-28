@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000,DB_adress } = process.env;
 const mongoose = require('mongoose');
 
 const app = express();
@@ -13,8 +13,9 @@ const usersRout = require('./routes/usersRout');
 const moviesRout = require('./routes/moviesRout');
 const NotFoundError = require('./errors/not-found-err');
 const auth = require('./middlewares/auth');
+const options = require('./utils/constants');
 
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
+mongoose.connect(`${DB_adress}`, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
@@ -22,14 +23,7 @@ mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
   autoIndex: true,
 });
 app.use(express.json());
-const options = {
-  origin: [
-    'http://localhost:3000',
-    'http://moviefinder.nomoredomains.club',
-    'https://TrigerBOT.github.io',
-  ],
 
-};
 app.use(cors(options));
 app.get('/crash-test', () => {
   setTimeout(() => {
@@ -66,7 +60,7 @@ app.post(
 
 app.use('/users', auth, usersRout);
 app.use('/movies', auth, moviesRout);
-app.use('*', () => {
+app.use('*', auth, () => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
 app.use(errorLogger);
