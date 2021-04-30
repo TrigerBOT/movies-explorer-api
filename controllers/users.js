@@ -90,7 +90,7 @@ const login = (req, res, next) => {
         { expiresIn: '7d' },
       );
 
-      res.send({ token });
+      return  res.send({ token });
     })
     .catch(next);
 };

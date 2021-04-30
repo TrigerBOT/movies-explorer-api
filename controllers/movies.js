@@ -41,7 +41,8 @@ const createMovie = (req, res, next) => {
     .then((movie) => {
       const newMovie = movie;
       newMovie.owner = undefined;
-      res.status(201).send({ data: newMovie });
+      return  res.status(201).send({ data: newMovie });
+      next();
     })
     .catch((err) => {
       console.log(err.message);
@@ -58,11 +59,11 @@ const createMovie = (req, res, next) => {
 const getOwnMovies = (req, res, next) => {
   const owner = req.user._id;
 
-  Movie.find({ owner })
+  Movie.find({ owner }).select('-owner')
     .then((movies) => {
-      res.status(200).send(movies);
+      return  res.status(201).send(movies);
     })
-    .select('-owner')
+
     .catch(next);
 };
 
@@ -80,7 +81,7 @@ const removeMovie = (req, res, next) => {
           _id: req.params.movieId,
         }).select('-owner')
           .then((deletedMovie) => {
-            res.status(200).send({ data: deletedMovie });
+            return    res.status(200).send({ data: deletedMovie });
           })
           .catch(next);
       }
