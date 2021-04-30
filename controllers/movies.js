@@ -41,8 +41,7 @@ const createMovie = (req, res, next) => {
     .then((movie) => {
       const newMovie = movie;
       newMovie.owner = undefined;
-      return  res.status(201).send({ data: newMovie });
-      next();
+      res.status(201).send({ data: newMovie });
     })
     .catch((err) => {
       console.log(err.message);
@@ -59,9 +58,11 @@ const createMovie = (req, res, next) => {
 const getOwnMovies = (req, res, next) => {
   const owner = req.user._id;
 
-  Movie.find({ owner }).select('-owner')
+  Movie.find({ owner })
+    .select('-owner')
+
     .then((movies) => {
-      return  res.status(201).send(movies);
+      res.status(200).send(movies);
     })
 
     .catch(next);
@@ -69,7 +70,8 @@ const getOwnMovies = (req, res, next) => {
 
 // DELETE /movies/:movieId
 const removeMovie = (req, res, next) => {
-  Movie.find({ _id: req.params.movieId }).select('+owner')
+  Movie.find({ _id: req.params.movieId })
+    .select('+owner')
     .then((movie) => {
       if (!movie[0]) {
         throw new NotFoundError(searchFilmError);
@@ -79,9 +81,10 @@ const removeMovie = (req, res, next) => {
       } else {
         Movie.findOneAndDelete({
           _id: req.params.movieId,
-        }).select('-owner')
+        })
+          .select('-owner')
           .then((deletedMovie) => {
-            return    res.status(200).send({ data: deletedMovie });
+            res.status(200).send({ data: deletedMovie });
           })
           .catch(next);
       }

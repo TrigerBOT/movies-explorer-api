@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { PORT = 3000, DB_adress } = process.env;
+const { PORT = 3000, dbAdress } = process.env;
 const mongoose = require('mongoose');
 
 const app = express();
@@ -15,7 +15,7 @@ const NotFoundError = require('./errors/not-found-err');
 const auth = require('./middlewares/auth');
 const options = require('./utils/constants');
 
-const DB_URL = DB_adress || 'mongodb://localhost:27017/bitfilmsdb';
+const DB_URL = dbAdress || 'mongodb://localhost:27017/bitfilmsdb';
 mongoose.connect(`${DB_URL}`, {
   useNewUrlParser: true,
   useCreateIndex: true,
