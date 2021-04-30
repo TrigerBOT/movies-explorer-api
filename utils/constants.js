@@ -29,7 +29,7 @@ const requestedResourceWasNotFound = 'Запрашиваемый ресурс н
 const urlRegExp = /^(https?:\/\/)([\da-z.-]{1,})(\.)([a-z]{2,6})(\/?)([\da-z-.\W]*)/;
 const emailRegExp = /^([\w-.]+@([\w-]+\.)+[\w-]{2,4})?$/;
 
-// данные БД
+// данные
 const options = {
   origin: [
     'http://localhost:3000',

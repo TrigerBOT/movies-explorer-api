@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { PORT = 3000,DB_adress } = process.env;
+const { PORT = 3000 } = process.env;
 const mongoose = require('mongoose');
 
 const app = express();
@@ -15,7 +15,7 @@ const NotFoundError = require('./errors/not-found-err');
 const auth = require('./middlewares/auth');
 const options = require('./utils/constants');
 
-mongoose.connect(`${DB_adress}`, {
+mongoose.connect(`${process.env.DB_adress}`, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
@@ -42,7 +42,7 @@ app.post(
       name: Joi.string().min(2).max(30),
 
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(8),
+      password: Joi.string().required(),
     }),
   }),
   createUser,
@@ -65,11 +65,12 @@ app.use('*', auth, () => {
 });
 app.use(errorLogger);
 app.use(errors());
-app.use((req, res, err) => {
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res.status(statusCode).send({
     message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
   });
+  next();
 });
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

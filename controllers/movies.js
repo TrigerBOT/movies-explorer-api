@@ -19,7 +19,7 @@ const createMovie = (req, res, next) => {
     description,
     image,
     thumbnail,
-    trailerLink,
+    trailer,
     movieId,
     nameRU,
     nameEN,
@@ -32,17 +32,19 @@ const createMovie = (req, res, next) => {
     description,
     image,
     thumbnail,
-    trailer: trailerLink,
+    trailer,
     movieId,
     owner: ownerId,
     nameRU,
     nameEN,
   })
     .then((movie) => {
-      movie.owner = undefined;
-      res.status(201).send({ data: movie });
+      const newMovie = movie;
+      newMovie.owner = undefined;
+      res.status(201).send({ data: newMovie });
     })
     .catch((err) => {
+      console.log(err.message);
       if (err.name === 'ValidationError') {
         throw new BadRequestError(err.message);
       } else if (err.name === 'MongoError' && err.code === 11000) {
@@ -57,36 +59,28 @@ const getOwnMovies = (req, res, next) => {
   const owner = req.user._id;
 
   Movie.find({ owner })
+
     .then((movies) => {
-      movies.forEach((movie) => {
-        movie.owner = undefined;
-      });
       res.status(200).send(movies);
     })
+    .select('-owner')
     .catch(next);
 };
 
 // DELETE /movies/:movieId
 const removeMovie = (req, res, next) => {
-  Movie.find({ _id: req.params.movieId })
+  Movie.find({ _id: req.params.movieId }).select('+owner')
     .then((movie) => {
-      if (!movie) {
+      if (!movie[0]) {
         throw new NotFoundError(searchFilmError);
       }
-      if (movie.owner !== req.user._id) {
+      if (movie[0].owner.toString() !== req.user._id) {
         throw new UnauthorizedError(loginError);
       } else {
         Movie.findOneAndDelete({
           _id: req.params.movieId,
-        })
+        }).select('-owner')
           .then((deletedMovie) => {
-            if (!deletedMovie) {
-              throw new NotFoundError(searchFilmError);
-            }
-            if (deletedMovie.owner !== req.user._id) {
-              throw new ConflictError(idExistsError);
-            }
-            deletedMovie.owner = undefined;
             res.status(200).send({ data: deletedMovie });
           })
           .catch(next);
@@ -94,7 +88,6 @@ const removeMovie = (req, res, next) => {
     })
     .catch(next);
 };
-
 module.exports = {
   createMovie,
   getOwnMovies,
