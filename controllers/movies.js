@@ -59,7 +59,6 @@ const getOwnMovies = (req, res, next) => {
   const owner = req.user._id;
 
   Movie.find({ owner })
-
     .then((movies) => {
       res.status(200).send(movies);
     })

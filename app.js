@@ -15,7 +15,8 @@ const NotFoundError = require('./errors/not-found-err');
 const auth = require('./middlewares/auth');
 const options = require('./utils/constants');
 
-mongoose.connect(`${process.env.DB_adress}`, {
+const DB_URL = process.env.DB_adress || 'mongodb://localhost:27017/bitfilmsdb';
+mongoose.connect(`${DB_URL}`, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
